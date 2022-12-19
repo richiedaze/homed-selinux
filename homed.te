@@ -125,6 +125,7 @@ kernel_read_system_state(systemd_homed_t)
 auth_read_passwd_file(systemd_homed_t)
 auth_signal_chk_passwd(systemd_homed_t)
 
+dev_getattr_generic_blk_files(systemd_homed_t)
 dev_read_sysfs(systemd_homed_t)
 
 fs_getattr_cgroup(systemd_homed_t)
@@ -238,6 +239,7 @@ dev_read_rand(systemd_homework_t)
 dev_read_sysfs(systemd_homework_t)
 dev_rw_loop_control(systemd_homework_t)
 dev_rw_lvm_control(systemd_homework_t)
+dev_watch_generic_dirs(systemd_homework_t)
 
 domain_manage_all_domains_keyrings(systemd_homework_t)
 

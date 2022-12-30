@@ -112,6 +112,7 @@ add_entry_dirs_pattern(systemd_homed_t, systemd_userdbd_runtime_t, systemd_userd
 filetrans_pattern(systemd_homed_t, systemd_userdbd_runtime_t, systemd_userdbd_runtime_t, sock_file, "io.systemd.Home")
 allow chkpwd_t systemd_homed_t:unix_stream_socket connectto;
 allow init_t systemd_homed_t:unix_stream_socket connectto;
+allow passwd_t systemd_homed_t:unix_stream_socket connectto;
 # daemons_enable_cluster_mode bypass
 allow daemon systemd_homed_t:unix_stream_socket connectto;
 
@@ -160,6 +161,10 @@ optional_policy(`
 
 optional_policy(`
     mta_getattr_spool(systemd_homed_t)
+')
+
+optional_policy(`
+    policykit_dbus_chat(systemd_homed_t)
 ')
 
 optional_policy(`

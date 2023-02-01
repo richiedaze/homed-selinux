@@ -127,8 +127,6 @@ fs_getattr_cgroup(systemd_homed_t)
 fs_getattr_xattr_fs(systemd_homed_t)
 fs_search_cgroup_dirs(systemd_homed_t)
 
-init_dbus_chat(systemd_homed_t)
-
 logging_send_syslog_msg(systemd_homed_t)
 
 miscfiles_read_all_certs(systemd_homed_t)
@@ -145,20 +143,13 @@ optional_policy(`
 ')
 
 optional_policy(`
-    dbus_acquire_svc_system_dbusd(systemd_homed_t)
-    allow daemon systemd_homed_t:dbus send_msg; # systemd_sleep_t
+    dbus_connect_system_bus(systemd_homed_t)
+    init_dbus_chat(systemd_homed_t)
+    allow nsswitch_domain systemd_homed_t:dbus send_msg;
 ')
 
 optional_policy(`
     mta_getattr_spool(systemd_homed_t)
-')
-
-optional_policy(`
-    policykit_dbus_chat(systemd_homed_t)
-')
-
-optional_policy(`
-    xserver_dbus_chat_xdm(systemd_homed_t)
 ')
 
 #######################################

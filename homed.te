@@ -167,6 +167,7 @@ allow systemd_homework_t self:netlink_kobject_uevent_socket create_socket_perms;
 allow systemd_homework_t self:process { setsched getsched };
 allow systemd_homework_t self:sem create_sem_perms;
 allow systemd_homework_t self:unix_dgram_socket create_socket_perms;
+allow systemd_homework_t self:user_namespace create;
 allow systemd_homework_t systemd_homed_t:unix_dgram_socket sendto;
 
 # /var/home
@@ -244,4 +245,5 @@ storage_raw_read_removable_device(systemd_homework_t)
 storage_rw_inherited_removable_device(systemd_homework_t)
 storage_manage_fixed_disk(systemd_homework_t)
 
+udev_read_pid_files(systemd_homework_t)
 udev_search_pids(systemd_homework_t)

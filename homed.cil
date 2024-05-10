@@ -1,0 +1,653 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; homed.cil
+; SELinux cil template for homed
+; copyright 2024 @richiedaze:fedora.im
+; SPDX-License-Identifier: GPL-3.0-or-later
+
+
+; domain requirements
+(typeattributeset cil_gen_require daemon)
+(typeattributeset cil_gen_require direct_init)
+(typeattributeset cil_gen_require direct_init_entry)
+(typeattributeset cil_gen_require direct_run_init)
+(typeattributeset cil_gen_require domain)
+(typeattributeset cil_gen_require corenet_unlabeled_type)
+(typeattributeset cil_gen_require entry_type)
+(typeattributeset cil_gen_require exec_type)
+(typeattributeset cil_gen_require file_type)
+(typeattributeset cil_gen_require initrc_transition_domain)
+(typeattributeset cil_gen_require non_auth_file_type)
+(typeattributeset cil_gen_require non_security_file_type)
+
+
+(type systemd_homed_t)
+    (typeattributeset daemon (systemd_homed_t ))
+    (typeattributeset domain (systemd_homed_t systemd_homework_t ))
+    (typeattributeset file_type (systemd_homed_unit_file_t ))
+    (typeattributeset corenet_unlabeled_type (systemd_homed_t ))
+    (typeattributeset non_auth_file_type (systemd_homed_unit_file_t ))
+    (typeattributeset non_security_file_type (systemd_homed_unit_file_t ))
+    (roletype object_r systemd_homed_t)
+(type systemd_homed_exec_t)
+    (typeattributeset direct_init_entry (systemd_homed_exec_t ))
+    (typeattributeset entry_type (systemd_homed_exec_t ))
+    (typeattributeset exec_type (systemd_homed_exec_t ))
+    (typeattributeset file_type (systemd_homed_unit_file_t ))
+    (typeattributeset non_auth_file_type (systemd_homed_unit_file_t ))
+    (typeattributeset non_security_file_type (systemd_homed_unit_file_t ))
+    (roletype object_r systemd_homed_exec_t)
+        (allow systemd_homed_t systemd_homed_exec_t (file (entrypoint)))
+        (allow systemd_homed_t systemd_homed_exec_t (file (ioctl read getattr lock map execute open)))
+
+(filecon "/usr/lib/systemd/systemd-homed" file (system_u object_r systemd_homed_exec_t ((s0) (s0))))
+
+
+
+(type systemd_homework_t)
+    (typeattributeset domain (systemd_homework_t ))
+    (typeattributeset file_type (systemd_homework_t ))
+    (typeattributeset corenet_unlabeled_type (systemd_homework_t ))
+    (typeattributeset non_auth_file_type (systemd_homework_t ))
+    (typeattributeset non_security_file_type (systemd_homework_t ))
+    (roletype object_r systemd_homework_t)
+(type systemd_homework_exec_t)
+    (typeattributeset entry_type (systemd_homework_exec_t ))
+    (typeattributeset exec_type (systemd_homework_exec_t ))
+    (typeattributeset file_type (systemd_homed_unit_file_t ))
+    (typeattributeset non_auth_file_type (systemd_homed_unit_file_t ))
+    (typeattributeset non_security_file_type (systemd_homed_unit_file_t))
+    (roletype object_r systemd_homework_exec_t)
+        (allow systemd_homework_t systemd_homework_exec_t (file (entrypoint)))
+        (allow systemd_homework_t systemd_homework_exec_t (file (ioctl read getattr lock map execute open)))
+
+(filecon "/usr/lib/systemd/systemd-homework" file (system_u object_r systemd_homework_exec_t ((s0) (s0))))
+
+
+; role types
+(roleattributeset cil_gen_require system_r)
+(roletype system_r systemd_homework_t)
+(roletype system_r user_home_type)
+(roletype system_r user_home_dir_t)
+
+
+
+(typepermissive systemd_homed_t)
+(typepermissive systemd_homework_t)
+
+(allow systemd_homed_t self (capability (sys_admin sys_resource)))
+(allow systemd_homed_t self (capability (dac_override dac_read_search setgid setuid)))
+(allow systemd_homed_t self (netlink_kobject_uevent_socket (ioctl read write create getattr setattr lock append bind connect getopt setopt shutdown)))
+(allow systemd_homed_t self (unix_dgram_socket (ioctl read write create getattr setattr lock append bind connect getopt setopt shutdown)))
+
+(allow systemd_homework_t self (cap_userns (sys_ptrace sys_admin)))
+(allow systemd_homework_t self (capability (chown fowner fsetid setfcap)))
+(allow systemd_homework_t self (capability (dac_override dac_read_search setgid setuid)))
+(allow systemd_homework_t self (capability (sys_admin sys_resource)))
+(allow systemd_homework_t self (capability (mknod)))
+(allow systemd_homework_t self (netlink_kobject_uevent_socket (ioctl read write create getattr setattr lock append bind connect getopt setopt shutdown)))
+(allow systemd_homework_t self (process (getsched setsched)))
+(allow systemd_homework_t self (sem (create destroy getattr setattr read write associate unix_read unix_write)))
+(allow systemd_homework_t self (unix_dgram_socket (ioctl read write create getattr setattr lock append bind connect getopt setopt shutdown)))
+(allow systemd_homework_t self (user_namespace (create)))
+
+(typetransition systemd_homed_t systemd_homework_exec_t process systemd_homework_t)
+    (allow systemd_homed_t systemd_homework_exec_t (file (ioctl read getattr map execute open)))
+    (allow systemd_homed_t systemd_homework_t (process (transition)))
+    (allow systemd_homed_t systemd_homework_t (process (noatsecure rlimitinh siginh)))
+    (allow systemd_homed_t systemd_homework_t (process2 (nnp_transition)))
+    (allow systemd_homework_t systemd_homed_t (fd (use)))
+    (allow systemd_homework_t systemd_homed_t (fifo_file (ioctl read write getattr lock append)))
+    (allow systemd_homework_t systemd_homed_t (process (sigchld)))
+    (allow systemd_homework_t systemd_homed_t (unix_dgram_socket (sendto)))
+(allow systemd_homework_t domain (key (view read write search link setattr create)))
+
+
+; process requirements
+(typeattributeset cil_gen_require fixed_disk_raw_read)
+(typeattributeset fixed_disk_raw_read (systemd_homework_t ))
+
+(typeattributeset cil_gen_require fixed_disk_raw_write)
+(typeattributeset fixed_disk_raw_write (systemd_homework_t ))
+
+(typeattributeset cil_gen_require nsswitch_domain)
+(typeattributeset nsswitch_domain (systemd_homed_t ))
+
+(typeattributeset cil_gen_require netlabel_peer_type)
+(typeattributeset netlabel_peer_type (systemd_homed_t ))
+
+(typeattributeset cil_gen_require kernel_system_state_reader)
+(typeattributeset kernel_system_state_reader (systemd_homed_t systemd_homework_t ))
+
+(typeattributeset cil_gen_require syslog_client_type)
+(typeattributeset syslog_client_type (systemd_homed_t systemd_homework_t ))
+
+(typeattributeset cil_gen_require userdom_home_manager_type)
+(typeattributeset userdom_home_manager_type (systemd_homed_t systemd_homework_t ))
+
+(typeattributeset cil_gen_require userdom_filetrans_type)
+(typeattributeset userdom_filetrans_type (systemd_homed_t systemd_homework_t ))
+
+
+; directory requirements
+(typeattributeset cil_gen_require pidfile)
+(typeattributeset cil_gen_require user_home_content_type)
+(typeattributeset cil_gen_require ubac_constrained_type)
+(typeattributeset cil_gen_require polymember)
+(typeattributeset cil_gen_require security_file_type)
+(typeattributeset cil_gen_require auth_file_type)
+
+
+
+; /usr/lib/systemd/system
+(type systemd_homed_unit_file_t)
+    (typeattributeset file_type systemd_homed_unit_file_t)
+    (typeattributeset non_auth_file_type systemd_homed_unit_file_t)
+    (typeattributeset non_security_file_type systemd_homed_unit_file_t)
+    (roletype object_r systemd_homed_unit_file_t)
+
+    (typeattributeset cil_gen_require systemd_unit_file_type)
+    (typeattributeset systemd_unit_file_type (systemd_homed_unit_file_t ))
+(filecon "/usr/lib/systemd/system/systemd-homed-activate\.service" file (system_u object_r systemd_homed_unit_file_t ((s0) (s0))))
+(filecon "/usr/lib/systemd/system/systemd-homed\.service" file (system_u object_r systemd_homed_unit_file_t ((s0) (s0))))
+
+
+
+; SYSTEMD_HOMED_RECORD_DIR
+
+; /var/lib/systemd/home
+(type systemd_homed_record_dir_t)
+    (typeattributeset file_type systemd_homed_record_dir_t)
+    (typeattributeset non_auth_file_type systemd_homed_record_dir_t)
+    (typeattributeset non_security_file_type systemd_homed_record_dir_t)
+    (roletype object_r systemd_homed_record_dir_t)
+
+(typetransition systemd_homed_t init_var_lib_t dir "home" systemd_homed_record_dir_t)
+    (allow systemd_homed_t systemd_homed_record_dir_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+        
+(filecon "/var/lib/systemd/home" dir (system_u object_r systemd_homed_record_dir_t ((s0) (s0))))
+
+    (type systemd_homed_record_t)
+        (typeattributeset file_type systemd_homed_record_t)
+        (typeattributeset auth_file_type systemd_homed_record_t)
+        (typeattributeset security_file_type systemd_homed_record_t)
+        (roletype object_r systemd_homed_record_t)
+
+    (typetransition systemd_homed_t systemd_homed_record_dir_t file systemd_homed_record_t)
+        (allow systemd_homed_t systemd_homed_record_t (file (ioctl read write create getattr setattr lock append unlink link rename open watch watch_reads)))
+        (allow systemd_homework_t systemd_homed_record_t (file (ioctl read getattr lock open unlink)))
+        
+    (filecon "/var/lib/systemd/home/(.+)\.identity" file (system_u object_r systemd_homed_record_t ((s0) (s0))))
+    (filecon "/var/lib/systemd/home/local\.private" file (system_u object_r systemd_homed_record_t ((s0) (s0))))
+    (filecon "/var/lib/systemd/home/(.+)\.public" file (system_u object_r systemd_homed_record_t ((s0) (s0))))
+    (filecon "/var/lib/systemd/home/local\.public" file (system_u object_r systemd_homed_record_t ((s0) (s0))))
+    (filecon "HOME_DIR/\.identity" file (system_u object_r systemd_homed_record_t ((s0) (s0))))
+
+
+
+; /var/run/cryptsetup
+(type systemd_homed_cryptsetup_dir_t)
+    (typeattributeset file_type systemd_homed_cryptsetup_dir_t)
+    (typeattributeset non_auth_file_type systemd_homed_cryptsetup_dir_t)
+    (typeattributeset non_security_file_type systemd_homed_cryptsetup_dir_t)
+    (typeattributeset pidfile (systemd_homed_cryptsetup_dir_t ))
+    (typeattributeset mountpoint systemd_homed_cryptsetup_dir_t)
+    (roletype object_r systemd_homed_cryptsetup_dir_t)
+    (typetransition systemd_homework_t var_run_t dir "cryptsetup" systemd_homed_cryptsetup_dir_t)
+        (allow systemd_homework_t systemd_homed_cryptsetup_dir_t (dir (ioctl read write create getattr setattr lock unlink link rename open )))
+        (allow systemd_homework_t systemd_homed_cryptsetup_dir_t (dir (watch watch_reads add_name remove_name reparent search rmdir)))
+        (allow systemd_homework_t systemd_homed_cryptsetup_dir_t (file (ioctl read write create getattr setattr lock append unlink link rename open watch watch_reads)))
+
+    (filecon "/var/run/cryptsetup" dir (system_u object_r systemd_homed_cryptsetup_dir_t ((s0) (s0))))
+
+
+
+; LUKS volume
+(type systemd_homed_crypto_luks_t)
+    (typeattributeset file_type systemd_homed_crypto_luks_t)
+    (typeattributeset non_auth_file_type systemd_homed_crypto_luks_t)
+    (typeattributeset non_security_file_type systemd_homed_crypto_luks_t)
+    (typeattributeset polymember (systemd_homed_crypto_luks_t ))
+    (typeattributeset user_home_content_type (systemd_homed_crypto_luks_t ))
+    (typeattributeset user_home_type (systemd_homed_crypto_luks_t ))
+    (typeattributeset ubac_constrained_type (systemd_homed_crypto_luks_t ))
+    (roletype object_r systemd_homed_crypto_luks_t)
+    (allow systemd_homed_crypto_luks_t user_home_t (filesystem (associate)))
+
+(filecon "/var/home/(.+)\.home" file (system_u object_r systemd_homed_crypto_luks_t ((s0) (s0))))
+
+
+
+; SYSTEMD_HOMED_RUNTIME_DIR
+
+; /var/run/systemd/home
+(type systemd_homed_runtime_dir_t)
+    (typeattributeset file_type systemd_homed_runtime_dir_t)
+    (typeattributeset pidfile systemd_homed_runtime_dir_t)
+    (typeattributeset non_auth_file_type systemd_homed_runtime_dir_t)
+    (typeattributeset non_security_file_type systemd_homed_runtime_dir_t)
+    (typeattributeset mountpoint systemd_homed_runtime_work_dir_t)
+    (roletype object_r systemd_homed_runtime_dir_t)
+
+(typetransition systemd_homed_t init_var_run_t dir "home" systemd_homed_runtime_dir_t)
+    (allow systemd_homed_t systemd_homed_runtime_dir_t (dir (ioctl create read write getattr lock open add_name remove_name search)))
+    (allow systemd_homework_t systemd_homed_runtime_dir_t (dir (getattr open search)))
+    (allow nsswitch_domain systemd_homed_runtime_dir_t (dir (getattr open search)))
+(filecon "/var/run/systemd/home" dir (system_u object_r systemd_homed_runtime_dir_t ((s0) (s0))))
+    
+    ; /var/run/systemd/home/notify
+    (type systemd_homed_runtime_socket_t)
+        (typeattributeset file_type systemd_homed_runtime_socket_t)
+        (typeattributeset pidfile systemd_homed_record_t)
+        (typeattributeset non_auth_file_type systemd_homed_runtime_socket_t)
+        (typeattributeset non_security_file_type systemd_homed_runtime_socket_t)
+        (roletype object_r systemd_homed_runtime_socket_t)
+
+    (typetransition systemd_homed_t systemd_homed_runtime_dir_t sock_file "notify" systemd_homed_runtime_socket_t)
+        (allow systemd_homed_t systemd_homed_runtime_socket_t (sock_file (create getattr setattr open unlink)))
+        (allow systemd_homework_t systemd_homed_runtime_socket_t (sock_file (write getattr append open)))
+        (allow nsswitch_domain systemd_homed_runtime_socket_t (sock_file (write getattr append open)))
+
+    (filecon "/var/run/systemd/home/notify" socket (system_u object_r systemd_homed_runtime_socket_t ((s0) (s0))))
+
+    ; /var/run/systemd/home/*.dont-suspend
+    (type systemd_homed_runtime_pipe_t)
+        (typeattributeset file_type systemd_homed_runtime_pipe_t)
+        (typeattributeset pidfile systemd_homed_runtime_pipe_t)
+        (typeattributeset non_auth_file_type systemd_homed_runtime_pipe_t)
+        (typeattributeset non_security_file_type systemd_homed_runtime_pipe_t)
+        (roletype object_r systemd_homed_runtime_pipe_t)
+
+    (typetransition systemd_homed_t systemd_homed_runtime_dir_t fifo_file systemd_homed_runtime_pipe_t)
+        (allow systemd_homed_t systemd_homed_runtime_pipe_t (fifo_file (ioctl read write create getattr setattr lock append unlink link rename open)))
+        (allow nsswitch_domain systemd_homed_runtime_pipe_t (fifo_file (ioctl write getattr lock append open)))
+
+    (filecon "/var/run/systemd/home/(.+)\.dont-suspend" pipe (system_u object_r systemd_homed_runtime_pipe_t ((s0) (s0))))
+
+
+
+; SYSTEMD_HOMED_WORK_DIR
+
+; /var/run/systemd/user-home-mount
+(type systemd_homed_runtime_work_dir_t)
+    (typeattributeset file_type systemd_homed_runtime_work_dir_t)
+    (typeattributeset pidfile systemd_homed_runtime_work_dir_t)
+    (typeattributeset non_auth_file_type systemd_homed_runtime_work_dir_t)
+    (typeattributeset non_security_file_type systemd_homed_runtime_work_dir_t)
+    (roletype object_r systemd_homed_runtime_work_dir_t)
+(typetransition systemd_homework_t init_var_run_t dir "user-home-mount" systemd_homed_runtime_work_dir_t)
+    (allow systemd_homework_t systemd_homed_runtime_work_dir_t (dir (ioctl create write getattr lock open remove_name search)))
+
+(filecon "/var/run/systemd/user-home-mount" dir (system_u object_r systemd_homed_runtime_work_dir_t ((s0) (s0))))
+
+
+
+; /var/run/systemd/userdb
+(typeattributeset cil_gen_require systemd_userdbd_runtime_t)
+    ; /var/run/systemd/userdb/io.systemd.Home
+    (typetransition systemd_homed_t systemd_userdbd_runtime_t sock_file "io.systemd.Home" systemd_userdbd_runtime_t)
+        (allow systemd_homed_t systemd_userdbd_runtime_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+        (allow systemd_homed_t systemd_userdbd_runtime_t (sock_file (ioctl read write create getattr setattr lock append unlink link rename open)))
+        (allow nsswitch_domain systemd_homed_t (unix_stream_socket (connectto)))
+        
+    (filecon "/var/run/systemd/userdb/io.systemd.Home" socket (system_u object_r systemd_userdbd_runtime_t ((s0) (s0))))
+
+
+; systemd_homed_tmpfs_t
+(type systemd_homed_tmpfs_t)
+(roletype object_r systemd_homed_tmpfs_t)
+(typeattributeset cil_gen_require tmpfsfile)
+(typeattributeset tmpfsfile (systemd_homed_tmpfs_t ))
+    (allow systemd_homed_t tmpfs_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+    (allow systemd_homed_tmpfs_t tmpfs_t (filesystem (associate)))
+(typetransition systemd_homed_t tmpfs_t file systemd_homed_tmpfs_t)
+    (allow systemd_homed_t systemd_homed_tmpfs_t (dir (getattr open search)))
+    (allow systemd_homed_t systemd_homed_tmpfs_t (file (ioctl read write getattr lock append open)))
+    (allow systemd_homework_t systemd_homed_tmpfs_t (dir (getattr open search)))
+    (allow systemd_homework_t systemd_homed_tmpfs_t (file (ioctl read write getattr lock append open)))
+
+
+; attributes
+(typeattributeset cil_gen_require cert_type)
+    (allow systemd_homed_t cert_type (dir (ioctl read getattr lock open search)))
+    (allow systemd_homed_t cert_type (file (ioctl read getattr lock open)))
+    (allow systemd_homed_t cert_type (lnk_file (read getattr)))
+    (allow systemd_homework_t cert_type (dir (ioctl read getattr lock open search)))
+    (allow systemd_homework_t cert_type (file (ioctl read getattr lock open)))
+    (allow systemd_homework_t cert_type (lnk_file (read getattr)))
+
+(typeattributeset cil_gen_require filesystem_type)
+    (allow systemd_homework_t filesystem_type (dir (getattr open search)))
+
+(typeattributeset cil_gen_require initrc_domain)
+    (typetransition initrc_domain systemd_homed_exec_t process systemd_homed_t)
+    
+(typeattributeset cil_gen_require mountpoint)
+    (allow systemd_homework_t mountpoint (dir (getattr mounton open search)))
+    (allow systemd_homework_t mountpoint (file (getattr mounton)))
+
+
+; file types
+(typeattributeset cil_gen_require bin_t)
+    (allow systemd_homework_t bin_t (dir (ioctl read getattr lock open search)))
+    (allow systemd_homework_t bin_t (lnk_file (read getattr)))
+    (allow systemd_homework_t bin_t (dir (getattr open search)))
+    (allow systemd_homework_t bin_t (lnk_file (read getattr)))
+
+(typeattributeset cil_gen_require cgroup_t)
+    (allow systemd_homed_t cgroup_t (dir (getattr open search)))
+    (allow systemd_homed_t cgroup_t (file (ioctl write getattr lock append open)))
+    (allow systemd_homed_t cgroup_t (filesystem (getattr)))
+    (allow systemd_homework_t cgroup_t (filesystem (getattr)))
+
+(typeattributeset cil_gen_require crack_db_t)
+    (allow systemd_homed_t crack_db_t (dir (getattr open search)))
+    (allow systemd_homed_t crack_db_t (file (ioctl read getattr lock open)))
+
+(typeattributeset cil_gen_require fs_t)
+    (allow systemd_homed_t fs_t (filesystem (getattr)))
+    (allow systemd_homed_exec_t fs_t (filesystem (associate)))
+    (allow systemd_homework_t fs_t (filesystem (mount remount unmount getattr)))
+    (allow systemd_homework_t fs_t (filesystem (relabelfrom)))
+    (allow systemd_homework_exec_t fs_t (filesystem (associate)))
+
+(typeattributeset cil_gen_require device_t)
+    (allow systemd_homed_t device_t (dir (ioctl read getattr lock open search)))
+    (allow systemd_homed_t device_t (blk_file (getattr)))
+    (allow systemd_homed_t device_t (lnk_file (read getattr)))
+    (allow systemd_homework_t device_t (dir (ioctl read getattr lock open search watch)))
+    (allow systemd_homework_t device_t (filesystem (getattr)))
+    (allow systemd_homework_t device_t (lnk_file (read getattr)))
+
+(typeattributeset cil_gen_require fixed_disk_device_t)
+    (allow systemd_homed_t fixed_disk_device_t (blk_file (getattr)))
+    (allow systemd_homework_t fixed_disk_device_t (blk_file (ioctl read write create getattr setattr lock append unlink link rename open)))
+    (allow systemd_homework_t fixed_disk_device_t (chr_file (ioctl read write create getattr setattr lock append unlink link rename open)))
+
+(typeattributeset cil_gen_require fsadm_t)
+(typeattributeset cil_gen_require fsadm_exec_t)
+(typetransition systemd_homework_t fsadm_exec_t process fsadm_t)
+    (allow systemd_homework_t fsadm_t (process (transition)))
+    (allow systemd_homework_t fsadm_t (process (noatsecure rlimitinh siginh)))
+    (allow systemd_homework_t fsadm_t (process2 (nnp_transition)))
+    (allow systemd_homework_t fsadm_exec_t (file (ioctl read getattr map execute open)))
+    (allow fsadm_t systemd_homework_t (fd (use)))
+    (allow fsadm_t systemd_homework_t (fifo_file (ioctl read write getattr lock append)))
+    (allow fsadm_t systemd_homework_t (process (sigchld)))
+    (allow fsadm_t systemd_homed_tmpfs_t (file (ioctl read write)))
+
+(typeattributeset cil_gen_require fsadm_var_run_t)
+    (allow systemd_homework_t fsadm_var_run_t (dir (ioctl read write create getattr setattr lock unlink link rename open watch watch_reads add_name remove_name reparent search rmdir)))
+    (allow systemd_homework_t fsadm_var_run_t (file (ioctl read write create getattr setattr lock append unlink link rename open watch watch_reads)))
+(typetransition systemd_homework_t var_run_t dir "fsck" fsadm_var_run_t)
+(typetransition systemd_homework_t var_run_t dir "blkid" fsadm_var_run_t)
+
+(typeattributeset cil_gen_require home_root_t)
+    (allow systemd_homed_t home_root_t (dir (ioctl read getattr lock open search watch)))
+    (allow systemd_homed_t home_root_t (lnk_file (read getattr)))
+(typetransition systemd_homework_t home_root_t file systemd_homed_crypto_luks_t)
+(typetransition systemd_homework_t home_root_t dir user_home_dir_t)
+    (allow systemd_homework_t home_root_t (dir (ioctl read write getattr lock open add_name remove_name rmdir search)))
+    (allow systemd_homework_t home_root_t (lnk_file (read getattr)))
+
+(typeattributeset cil_gen_require init_t)
+    (allow systemd_homed_t init_t (dir (search)))
+    (allow systemd_homed_t init_t (file (open read)))
+    (allow init_t systemd_homed_t (process2 (nnp_transition nosuid_transition)))
+    (allow systemd_homework_t init_t (dir (getattr open search)))
+    (allow systemd_homework_t init_t (file (ioctl read getattr lock open)))
+    (allow systemd_homework_t init_t (lnk_file (read getattr)))
+    (allow systemd_homework_t init_t (unix_stream_socket (ioctl read write getattr setattr lock append bind connect listen accept getopt setopt shutdown)))
+
+(typeattributeset cil_gen_require init_var_lib_t)
+    (allow systemd_homed_t init_var_lib_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+    
+(typeattributeset cil_gen_require init_var_run_t)
+    (allow systemd_homed_t init_var_run_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+    (allow systemd_homed_t init_var_run_t (file (ioctl read getattr lock open)))
+    (allow systemd_homework_t init_var_run_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+
+(typeattributeset cil_gen_require install_t) ; pool-rpm-ostree
+    (allow install_t systemd_homed_exec_t (file (getattr link open read unlink write)))
+    (allow install_t systemd_homework_exec_t (file (getattr link open read unlink write)))
+
+(typeattributeset cil_gen_require kernel_t)
+    (allow systemd_homed_t kernel_t (unix_dgram_socket (sendto)))
+    (allow systemd_homework_t kernel_t (unix_dgram_socket (sendto)))
+    (allow systemd_homework_t kernel_t (system (ipc_info)))
+    (allow systemd_homework_t kernel_t (system (module_request)))
+
+(typeattributeset cil_gen_require lib_t)
+    (allow systemd_homed_t lib_t (dir (ioctl read getattr lock open search)))
+    (allow systemd_homed_t lib_t (file (ioctl read getattr lock open)))
+    (allow systemd_homed_t lib_t (lnk_file (read getattr)))
+
+(typeattributeset cil_gen_require loop_control_device_t)
+    (allow systemd_homework_t loop_control_device_t (chr_file (ioctl read write getattr lock append open)))
+
+(typeattributeset cil_gen_require lvm_control_t)
+    (allow systemd_homework_t lvm_control_t (chr_file (ioctl read write getattr lock append open)))
+
+(typeattributeset cil_gen_require lvm_var_run_t)
+    (allow systemd_homework_t lvm_var_run_t(dir (open read write add_name remove_name search)))
+    (allow systemd_homework_t lvm_var_run_t(file (create getattr lock open read unlink write)))
+
+(typeattributeset cil_gen_require nsfs_t)
+    (allow systemd_homework_t nsfs_t (file (ioctl read getattr lock open)))
+
+(typeattributeset cil_gen_require passwd_file_t)
+    (allow systemd_homework_t passwd_file_t (file (ioctl read getattr lock open)))
+
+(typeattributeset cil_gen_require proc_t)
+    (allow systemd_homework_t proc_t (dir (getattr open search)))
+
+(typeattributeset cil_gen_require random_device_t)
+    (allow systemd_homework_t random_device_t (chr_file (ioctl read getattr lock open)))
+
+(typeattributeset cil_gen_require removable_device_t)
+    (allow systemd_homed_t removable_device_t (blk_file (ioctl read getattr lock open)))
+    (allow systemd_homework_t removable_device_t (blk_file (ioctl read getattr lock open)))
+    (dontaudit systemd_homework_t removable_device_t (blk_file (read write)))
+
+(typeattributeset cil_gen_require shell_exec_t)
+    (allow systemd_homework_t shell_exec_t (file (ioctl read getattr lock map execute open execute_no_trans)))
+    (allow systemd_homework_t shell_exec_t (file (map)))
+
+(typeattributeset cil_gen_require sysctl_t)
+    (allow systemd_homework_t sysctl_t (dir (getattr open search)))
+
+(typeattributeset cil_gen_require sysctl_fs_t)
+    (allow systemd_homework_t sysctl_fs_t (dir (ioctl read getattr lock open search)))
+    (allow systemd_homework_t sysctl_fs_t (file (ioctl read getattr lock open)))
+
+(typeattributeset cil_gen_require sysfs_t)
+    (allow systemd_homed_t sysfs_t (dir (ioctl read getattr lock open search)))
+    (allow systemd_homed_t sysfs_t (file (ioctl read getattr lock open)))
+    (allow systemd_homed_t sysfs_t (lnk_file (read getattr)))
+    (allow systemd_homework_t sysfs_t (dir (ioctl read getattr lock open search)))
+    (allow systemd_homework_t sysfs_t (file (ioctl read getattr lock open)))
+    (allow systemd_homework_t sysfs_t (lnk_file (read getattr)))
+
+(typeattributeset cil_gen_require udev_var_run_t)
+    (allow systemd_homed_t udev_var_run_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+    (allow systemd_homed_t udev_var_run_t (file (ioctl read write create getattr setattr lock append unlink link rename open watch watch_reads)))
+    (allow systemd_homework_t udev_var_run_t (dir (ioctl read getattr lock open search)))
+    (allow systemd_homework_t udev_var_run_t (file (ioctl read getattr lock open)))
+    (allow systemd_homework_t udev_var_run_t (lnk_file (read getattr)))
+
+(typeattributeset cil_gen_require unconfined_t)
+    (allow unconfined_t systemd_homed_exec_t (file (getattr relabelto)))
+    (allow unconfined_t systemd_homework_exec_t (file (getattr relabelto)))
+
+(typeattributeset cil_gen_require unlabeled_t)
+    (allow systemd_homed_t unlabeled_t (dir (ioctl read write create getattr setattr lock unlink link rename open watch watch_reads add_name remove_name reparent search rmdir)))
+    (allow systemd_homed_t unlabeled_t (file (ioctl read write create getattr setattr lock append unlink link rename open watch watch_reads)))
+    (allow systemd_homework_t unlabeled_t (dir (mounton)))
+    (allow systemd_homework_t unlabeled_t (dir (ioctl read write create getattr setattr lock unlink link rename open watch watch_reads add_name remove_name reparent search rmdir)))
+    (allow systemd_homework_t unlabeled_t (file (ioctl read write create getattr setattr lock append unlink link rename open watch watch_reads)))
+    (allow daemon unlabeled_t (dir (getattr open search)))
+    (allow daemon unlabeled_t (file (ioctl read write getattr map open)))
+
+(typeattributeset cil_gen_require usb_device_t)
+    (allow systemd_homework_t usb_device_t (chr_file (ioctl read write getattr lock append open)))
+
+(typeattributeset cil_gen_require user_home_dir_t)
+(typemember systemd_homed_t user_home_dir_t dir user_home_dir_t)
+(typemember systemd_homework_t user_home_dir_t dir user_home_dir_t)
+    (allow systemd_homed_t user_home_dir_t (dir (ioctl read write create getattr setattr lock unlink link rename open watch watch_reads add_name remove_name reparent search rmdir)))
+    (allow systemd_homed_t user_home_dir_t (dir (relabelfrom relabelto)))
+    (allow systemd_homed_t user_home_dir_t (lnk_file (read getattr)))
+    (allow systemd_homework_t user_home_dir_t (dir (ioctl read write create getattr setattr lock unlink link rename open watch watch_reads add_name remove_name reparent search rmdir)))
+    (allow systemd_homework_t user_home_dir_t (dir (relabelfrom relabelto)))
+    (allow systemd_homework_t user_home_dir_t (lnk_file (read getattr)))
+(filecon "/var/home/(.+)\.homedir" file (system_u object_r user_home_dir_t ((s0) (s0))))
+
+(typeattributeset cil_gen_require user_home_t)
+    (allow systemd_homed_t user_home_t (dir (mounton)))
+    (allow systemd_homed_t user_home_t (file (entrypoint)))
+    (allow systemd_homework_t user_home_t (dir (mounton)))
+    (allow systemd_homework_t user_home_t (file (entrypoint)))
+
+(typeattributeset cil_gen_require user_home_type)
+    (allow systemd_homed_t user_home_type (dir (ioctl read write create getattr setattr lock unlink link rename open watch watch_reads add_name remove_name reparent search rmdir)))
+    (allow systemd_homed_t user_home_type (dir (relabelfrom relabelto)))
+    (allow systemd_homed_t user_home_type (file (ioctl read write create getattr setattr lock append unlink link rename open watch watch_reads)))
+    (allow systemd_homed_t user_home_type (file (relabelfrom relabelto)))
+    (allow systemd_homed_t user_home_type (chr_file (relabelfrom relabelto)))
+    (allow systemd_homed_t user_home_type (blk_file (relabelfrom relabelto)))
+    (allow systemd_homed_t user_home_type (fifo_file (ioctl read write create getattr setattr lock append unlink link rename open)))
+    (allow systemd_homed_t user_home_type (fifo_file (relabelfrom relabelto)))
+    (allow systemd_homed_t user_home_type (lnk_file (ioctl read write create getattr setattr lock append unlink link rename watch watch_reads)))
+    (allow systemd_homed_t user_home_type (lnk_file (relabelfrom relabelto)))
+    (allow systemd_homed_t user_home_type (sock_file (ioctl read write create getattr setattr lock append unlink link rename open)))
+    (allow systemd_homed_t user_home_type (sock_file (relabelfrom relabelto)))
+    (allow systemd_homework_t user_home_type (dir (ioctl read write create getattr setattr lock unlink link rename open watch watch_reads add_name remove_name reparent search rmdir)))
+    (allow systemd_homework_t user_home_type (dir (relabelfrom relabelto)))
+    (allow systemd_homework_t user_home_type (file (ioctl read write create getattr setattr lock append unlink link rename open watch watch_reads)))
+    (allow systemd_homework_t user_home_type (file (relabelfrom relabelto)))
+    (allow systemd_homework_t user_home_type (chr_file (relabelfrom relabelto)))
+    (allow systemd_homework_t user_home_type (blk_file (relabelfrom relabelto)))
+    (allow systemd_homework_t user_home_type (fifo_file (ioctl read write create getattr setattr lock append unlink link rename open)))
+    (allow systemd_homework_t user_home_type (fifo_file (relabelfrom relabelto)))
+    (allow systemd_homework_t user_home_type (lnk_file (ioctl read write create getattr setattr lock append unlink link rename watch watch_reads)))
+    (allow systemd_homework_t user_home_type (lnk_file (relabelfrom relabelto)))
+    (allow systemd_homework_t user_home_type (sock_file (ioctl read write create getattr setattr lock append unlink link rename open)))
+    (allow systemd_homework_t user_home_type (sock_file (relabelfrom relabelto)))
+
+(typeattributeset cil_gen_require usr_t)
+    (allow systemd_homed_t usr_t (dir (ioctl read getattr lock open search)))
+
+(typeattributeset cil_gen_require var_t)
+    (allow systemd_homed_t var_t (dir (getattr open search)))
+    (allow systemd_homed_t var_t (lnk_file (read getattr)))
+    (allow systemd_homework_t var_t (dir (getattr open search)))
+    (allow systemd_homework_t var_t (lnk_file (read getattr)))
+
+(typeattributeset cil_gen_require var_lib_t)
+    (allow systemd_homed_t var_lib_t (dir (getattr open search)))
+
+(typeattributeset cil_gen_require var_run_t)
+    (allow systemd_homed_t var_run_t (dir (getattr open search)))
+    (allow systemd_homed_t var_run_t (lnk_file (read getattr)))
+    (allow systemd_homework_t var_run_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+    (allow systemd_homework_t var_run_t (lnk_file (read getattr)))
+
+
+(typeattributeset cil_gen_require cifs_t)
+(booleanif (use_samba_home_dirs)
+    (true
+        (allow systemd_homed_t cifs_t (fifo_file (ioctl read write create getattr setattr lock append unlink link rename open)))
+        (allow systemd_homed_t cifs_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+        (allow systemd_homed_t cifs_t (sock_file (ioctl read write create getattr setattr lock append unlink link rename open)))
+        (allow systemd_homed_t cifs_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+        (allow systemd_homed_t cifs_t (lnk_file (ioctl read write create getattr setattr lock append unlink link rename watch watch_reads)))
+        (allow systemd_homed_t cifs_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+        (allow systemd_homed_t cifs_t (file (ioctl read write create getattr setattr lock append unlink link rename open watch watch_reads)))
+        (allow systemd_homed_t cifs_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+        (allow systemd_homed_t cifs_t (dir (ioctl read write create getattr setattr lock unlink link rename open watch watch_reads add_name remove_name reparent search rmdir)))
+        (allow systemd_homed_t cifs_t (dir (mounton)))
+        (allow systemd_homed_t cifs_t (filesystem (mount)))
+        (allow systemd_homework_t cifs_t (fifo_file (ioctl read write create getattr setattr lock append unlink link rename open)))
+        (allow systemd_homework_t cifs_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+        (allow systemd_homework_t cifs_t (sock_file (ioctl read write create getattr setattr lock append unlink link rename open)))
+        (allow systemd_homework_t cifs_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+        (allow systemd_homework_t cifs_t (lnk_file (ioctl read write create getattr setattr lock append unlink link rename watch watch_reads)))
+        (allow systemd_homework_t cifs_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+        (allow systemd_homework_t cifs_t (file (ioctl read write create getattr setattr lock append unlink link rename open watch watch_reads)))
+        (allow systemd_homework_t cifs_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+        (allow systemd_homework_t cifs_t (dir (ioctl read write create getattr setattr lock unlink link rename open watch watch_reads add_name remove_name reparent search rmdir)))
+        (allow systemd_homework_t cifs_t (dir (mounton)))
+        (allow systemd_homework_t cifs_t (filesystem (mount)))
+    )
+)
+
+(typeattributeset cil_gen_require nfs_t)
+(typeattributeset cil_gen_require autofs_t)
+(booleanif (use_nfs_home_dirs)
+    (true
+        (allow systemd_homed_t nfs_t (fifo_file (ioctl read write create getattr setattr lock append unlink link rename open)))
+        (allow systemd_homed_t nfs_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+        (allow systemd_homed_t nfs_t (sock_file (ioctl read write create getattr setattr lock append unlink link rename open)))
+        (allow systemd_homed_t nfs_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+        (allow systemd_homed_t nfs_t (lnk_file (ioctl read write create getattr setattr lock append unlink link rename watch watch_reads)))
+        (allow systemd_homed_t nfs_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+        (allow systemd_homed_t autofs_t (dir (getattr open search)))
+        (allow systemd_homed_t nfs_t (file (ioctl read write create getattr setattr lock append unlink link rename open watch watch_reads)))
+        (allow systemd_homed_t nfs_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+        (allow systemd_homed_t autofs_t (dir (getattr open search)))
+        (allow systemd_homed_t nfs_t (dir (ioctl read write create getattr setattr lock unlink link rename open watch watch_reads add_name remove_name reparent search rmdir)))
+        (allow systemd_homed_t autofs_t (dir (getattr open search)))
+        (allow systemd_homed_t nfs_t (dir (mounton)))
+        (allow systemd_homed_t nfs_t (filesystem (mount)))
+        (allow systemd_homework_t nfs_t (fifo_file (ioctl read write create getattr setattr lock append unlink link rename open)))
+        (allow systemd_homework_t nfs_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+        (allow systemd_homework_t nfs_t (sock_file (ioctl read write create getattr setattr lock append unlink link rename open)))
+        (allow systemd_homework_t nfs_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+        (allow systemd_homework_t nfs_t (lnk_file (ioctl read write create getattr setattr lock append unlink link rename watch watch_reads)))
+        (allow systemd_homework_t nfs_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+        (allow systemd_homework_t autofs_t (dir (getattr open search)))
+        (allow systemd_homework_t nfs_t (file (ioctl read write create getattr setattr lock append unlink link rename open watch watch_reads)))
+        (allow systemd_homework_t nfs_t (dir (ioctl read write getattr lock open add_name remove_name search)))
+        (allow systemd_homework_t autofs_t (dir (getattr open search)))
+        (allow systemd_homework_t nfs_t (dir (ioctl read write create getattr setattr lock unlink link rename open watch watch_reads add_name remove_name reparent search rmdir)))
+        (allow systemd_homework_t autofs_t (dir (getattr open search)))
+        (allow systemd_homework_t nfs_t (dir (mounton)))
+        (allow systemd_homework_t nfs_t (filesystem (mount)))
+    )
+)
+(optional homed_optional_2
+    (typeattributeset cil_gen_require systemd_socket_proxyd_t)
+    (allow systemd_homed_t systemd_socket_proxyd_t (unix_stream_socket (connectto)))
+)
+(optional homed_optional_3
+    (typeattributeset cil_gen_require var_t)
+    (typeattributeset cil_gen_require var_lib_t)
+    (typeattributeset cil_gen_require container_runtime_tmpfs_t)
+    (allow systemd_homed_t var_t (dir (getattr open search)))
+    (allow systemd_homed_t var_lib_t (dir (getattr open search)))
+    (allow systemd_homed_t container_runtime_tmpfs_t (dir (getattr open search)))
+    (allow systemd_homed_t container_runtime_tmpfs_t (dir (ioctl read getattr lock open search)))
+    (allow systemd_homed_t container_runtime_tmpfs_t (dir (getattr open search)))
+    (allow systemd_homed_t container_runtime_tmpfs_t (file (ioctl read getattr lock open)))
+    (allow systemd_homed_t container_runtime_tmpfs_t (dir (getattr open search)))
+    (allow systemd_homed_t container_runtime_tmpfs_t (lnk_file (read getattr)))
+)
+(optional homed_optional_4
+    (typeattributeset cil_gen_require init_t)
+    (typeattributeset cil_gen_require system_dbusd_t)
+    (allow systemd_homed_t system_dbusd_t (dbus (acquire_svc)))
+    (allow systemd_homed_t init_t (dbus (send_msg)))
+    (allow init_t systemd_homed_t (dbus (send_msg)))
+    (allow nsswitch_domain systemd_homed_t (dbus (send_msg)))
+)
+(optional homed_optional_5
+    (typeattributeset cil_gen_require var_t)
+    (typeattributeset cil_gen_require mail_spool_t)
+    (typeattributeset cil_gen_require var_spool_t)
+    (allow systemd_homed_t var_t (dir (getattr open search)))
+    (allow systemd_homed_t var_spool_t (dir (getattr open search)))
+    (allow systemd_homed_t mail_spool_t (dir (ioctl read getattr lock open search)))
+    (allow systemd_homed_t mail_spool_t (dir (getattr open search)))
+    (allow systemd_homed_t mail_spool_t (file (getattr)))
+    (allow systemd_homed_t mail_spool_t (dir (getattr open search)))
+    (allow systemd_homed_t mail_spool_t (lnk_file (read getattr)))
+)
